@@ -7,3 +7,11 @@ spring:
     chat:
       options:
         model: gtp-4o-mini
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always
+  datasource:
+    url: jdbc:postgresql://localhost:5432/springai
+    username: springai
+    password: springai

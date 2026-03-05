@@ -1,6 +1,10 @@
 package dev.finashkin.springai;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.ChatMemoryRepository;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
@@ -8,15 +12,27 @@ import org.springframework.stereotype.Service;
 public class AiService {
 
     private final ChatClient chatClient;
-    private final MessageSource messageSource;
 
-    public AiService(ChatClient.Builder builder, MessageSource messageSource){
-        this.chatClient = builder.build();
-        this.messageSource = messageSource;
+    public AiService(ChatClient.Builder builder,
+                     ChatMemoryRepository chatMemoryRepository){
+        ChatMemory chatMemory = MessageWindowChatMemory.builder()
+                .chatMemoryRepository(chatMemoryRepository)
+                .maxMessages(10)
+                .build();
+
+
+        this.chatClient = builder
+                .defaultAdvisors(
+                        MessageChatMemoryAdvisor.builder(chatMemory).build()
+                ).build();
     }
 
-    public String chat(String message) {
-        return chatClient.prompt(message)
+    public String chat(String message, String conversationId) {
+        return chatClient.prompt()
+                .user(message)
+                .advisors(a -> a.param(
+                        ChatMemory.CONVERSATION_ID, conversationId
+                ))
                 .call()
                 .content();
     }

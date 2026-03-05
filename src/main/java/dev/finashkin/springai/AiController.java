@@ -16,9 +16,9 @@ public class AiController {
     }
 
     @GetMapping("/chat")
-    public String chat(@RequestParam String message) {
+    public String chat(@RequestParam String message, @RequestParam(defaultValue = "default") String conversationId) {
 
-        return aiService.chat(message);
+        return aiService.chat(message, conversationId);
     }
 
     @PostMapping("/review")
